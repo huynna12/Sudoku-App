@@ -45,4 +45,9 @@ public class SudokuSolver {
         }
         return sol;
     }
+
+    public SudokuBoard getCompleteBoard(){
+        getSolution();
+        return board;
+    }
 }

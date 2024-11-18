@@ -62,23 +62,24 @@ public class SudokuBoard {
      */
     boolean isValid(int row, int col, int value){
         //check the value in given row and column
-        for(int i = 0; i < 9; i++){
-            if((i != col && board[row][i] == value) || (i != row && board[col][i] == value)){
-                return false;
-            }
-        }
-
-        //check the value in sub-square (3x3 grid)
-        int startRow = row/3 * 3;
-        int startCol = col/3 * 3;
-        for(int r = startRow; r < startRow + 3; r++){
-            for(int c = startCol; c < startCol + 3; c++){
-                if(r!= row && c!=col && board[r][c] == value){
+            // Check the value in the given row and column
+            for (int i = 0; i < 9; i++) {
+                if (board[row][i] == value || board[i][col] == value) {
                     return false;
                 }
             }
-        }
-        return true;
+
+            // Check the value in the sub-square (3x3 grid)
+            int startRow = row / 3 * 3;
+            int startCol = col / 3 * 3;
+            for (int r = startRow; r < startRow + 3; r++) {
+                for (int c = startCol; c < startCol + 3; c++) {
+                    if (board[r][c] == value) {
+                        return false;
+                    }
+                }
+            }
+            return true;
     }
 
     private void fillBoard(){
@@ -91,7 +92,7 @@ public class SudokuBoard {
         }
 
         if(col == 9){
-            fillCell(row + 1, 0);  //reset the col and move down to a new row
+            return fillCell(row + 1, 0);  //reset the col and move down to a new row
         }
         shuffleArray(num);
         for(int curNum : num){
