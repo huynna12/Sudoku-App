@@ -46,8 +46,36 @@ public class SudokuSolver {
         return sol;
     }
 
+    private boolean solveBoard(int r, int c) {
+        int[] empty = findEmpty(r, c);
+        if (empty == null) {
+            // No more empty spots; board is solved
+            return true;
+        }
+
+        int row = empty[0];
+        int col = empty[1];
+
+        for (int curNum : num) {
+            if (board.isValid(row, col, curNum)) {
+                board.setCell(row, col, curNum);
+
+                // Recurse to solve the next empty cell
+                if (solveBoard(row, col)) {
+                    return true; // If solving was successful, stop recursion
+                }
+
+                // Backtrack
+                board.setCell(row, col, 0);
+            }
+        }
+
+        // No valid number for this cell; backtrack
+        return false;
+    }
+
     public SudokuBoard getCompleteBoard(){
-        getSolution();
+        solveBoard(0,0);
         return board;
     }
 }
