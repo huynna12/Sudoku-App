@@ -1,5 +1,7 @@
 [versions]
 agp = "8.7.2"
+guava = "32.0.1-jre"
+hamcrestCore = "1.3"
 kotlin = "2.0.0"
 coreKtx = "1.15.0"
 junit = "4.13.2"
@@ -12,6 +14,9 @@ testng = "6.9.6"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
+guava = { module = "com.google.guava:guava", version.ref = "guava" }
+hamcrest-core = { module = "org.hamcrest:hamcrest-core", version.ref = "hamcrestCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
