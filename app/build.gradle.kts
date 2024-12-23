@@ -54,9 +54,8 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-
     // Test dependencies
-    testImplementation("junit:junit:4.13.2") // Use only the latest JUnit version
+    testImplementation(libs.junit) // Use only the latest JUnit version
     testImplementation(libs.hamcrest.core) // If Hamcrest is explicitly required
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -69,5 +68,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Guava dependency
-    implementation("com.google.guava:guava:31.1-jre") // Use a stable, modern version
+    implementation(libs.guava) // Use a stable, modern version
+    implementation(libs.androidx.navigation.compose)
 }
