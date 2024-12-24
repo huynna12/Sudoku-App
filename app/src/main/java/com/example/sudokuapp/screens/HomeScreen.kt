@@ -1,9 +1,8 @@
-package com.example.sudokuapp
+package com.example.sudokuapp.screens
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -16,14 +15,17 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun DetailScreen(){
+fun HomeScreen(
+    navController: NavController
+) {
     Box(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .clickable{navController.navigate(route = Screen.Detail.route)},
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = "Detail",
+            text = "Sudoku",
             color = Color.Black,
             fontWeight = FontWeight.Bold, // Use FontWeight
             fontSize = 40.sp
@@ -33,6 +35,8 @@ fun DetailScreen(){
 
 @Composable
 @Preview(showBackground = true) //to show the background in the preview section
-fun DetailScreenPreview(){
-    DetailScreen()
+fun HomeScreenPreview(){
+    HomeScreen(
+        navController = rememberNavController()
+    )
 }

@@ -1,4 +1,4 @@
-package com.example.sudokuapp
+package com.example.sudokuapp.screens
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
