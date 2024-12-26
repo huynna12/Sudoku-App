@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
             SudokuAppTheme {
                 navController = rememberNavController()
                 SetupNavGraph(navController = navController)
-                MainScreen()
             }
         }
     }
