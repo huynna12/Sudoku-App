@@ -13,13 +13,13 @@ public class SudokuGenerator {
         this.board = board;
         solver = new SudokuSolver(board);
         switch(level){
-            case "easy":
+            case "Easy":
                 generateBoard(EASY);
                 break;
-            case "medium":
+            case "Medium":
                 generateBoard(MEDIUM);
                 break;
-            case "hard":
+            case "Hard":
                 generateBoard(HARD);
                 break;
         }

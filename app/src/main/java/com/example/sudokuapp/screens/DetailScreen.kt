@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun DetailScreen() {
+    var showDifficultyDialog by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -88,8 +90,69 @@ fun DetailScreen() {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(10.dp) // Space between buttons
             ) {
-                NewGameButton(onClick = { /* Navigate to New Game */ })
+                NewGameButton(onClick = { showDifficultyDialog = true })
                 ContinueGameButton(onClick = { /* Navigate to Continue Game */ })
+            }
+        }
+    }
+
+    // Display the difficulty selection dialog
+    if (showDifficultyDialog) {
+        DifficultySelectionDialog(
+            onDismissRequest = { showDifficultyDialog = false },
+            onDifficultySelected = { difficulty ->
+                showDifficultyDialog = false
+                // Use the selected difficulty to create the Sudoku board
+//                SudokuBuilder.createBoard(difficulty)
+            }
+        )
+    }
+}
+
+@Composable
+fun DifficultySelectionDialog(
+    onDismissRequest: () -> Unit,
+    onDifficultySelected: (String) -> Unit
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismissRequest) {
+        Card(
+            modifier = Modifier.padding(16.dp),
+            shape = MaterialTheme.shapes.medium
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = "Difficulty",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Button(
+                    onClick = { onDifficultySelected("Easy") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Easy")
+                }
+
+                Button(
+                    onClick = { onDifficultySelected("Medium") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Medium")
+                }
+
+                Button(
+                    onClick = { onDifficultySelected("Hard") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Hard")
+                }
             }
         }
     }
