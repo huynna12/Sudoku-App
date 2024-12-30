@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import model.SudokuBoard
+import model.SudokuGenerator
 
 @Composable
 fun BottomNavGraph(navController: NavHostController){
@@ -12,7 +14,7 @@ fun BottomNavGraph(navController: NavHostController){
         startDestination = BottomBar.Home.route
     ){
         composable(route = BottomBar.Home.route){
-            DetailScreen()
+            DetailScreen(navController)
         }
 
         composable(route = BottomBar.Profile.route){
