@@ -1,5 +1,6 @@
 package com.example.sudokuapp.screens
 
+import SudokuBoardDisplay
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -26,15 +27,19 @@ import androidx.compose.runtime.*   //mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import model.SudokuBoard
+import model.SudokuGenerator
 
 @Composable
-fun DetailScreen() {
+fun DetailScreen(navController: NavController) {
     var showDifficultyDialog by remember { mutableStateOf(false) }
+    var sudokuBoard by remember { mutableStateOf<SudokuBoard?>(null) }
 
     Box(
         modifier = Modifier
@@ -43,37 +48,36 @@ fun DetailScreen() {
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize(),
+            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween // Adjust spacing to leave room at the bottom
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp) // Closer spacing between cards
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
                     modifier = Modifier.padding(100.dp),
                     text = "Sudoku",
-                    color = Color.Black,
                     fontWeight = FontWeight.Bold, // Use FontWeight
-                    fontSize = 40.sp
+                    fontSize = 40.sp,
+                    style = MaterialTheme.typography.headlineLarge
                 )
                 ExpandableCard(
                     title = "Instruction",
                     content = """
                         Goal: Fill the 9x9 grid so each row, column, and 3x3 box contains the numbers 1 to 9, with no repeats.
-                        
+
                         Rules:
                         - Every **row**, **column**, and **3x3 box** must have the numbers 1 to 9.
                         - Some numbers are already given to help you.
-                        
+
                         How to play:
                         - Start by looking for rows, columns, or boxes with few missing numbers.
                         - Use the process of elimination to figure out where numbers go.
-                        
-                        Tips
+
+                        Tips:
                         - If stuck, look for cells where only one number can fit.
                         - Focus on completing one row, column, or box at a time.
                     """.trimIndent()
@@ -86,24 +90,26 @@ fun DetailScreen() {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 150.dp), // Ensure spacing from the bottom
+                    .padding(bottom = 150.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp) // Space between buttons
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 NewGameButton(onClick = { showDifficultyDialog = true })
-                ContinueGameButton(onClick = { /* Navigate to Continue Game */ })
+                ContinueGameButton(onClick = {
+                    sudokuBoard = sudokuBoard ?: SudokuBoard() // Start with an empty board if none exists
+                })
             }
         }
     }
 
-    // Display the difficulty selection dialog
+// Display difficulty selection dialog
     if (showDifficultyDialog) {
         DifficultySelectionDialog(
             onDismissRequest = { showDifficultyDialog = false },
             onDifficultySelected = { difficulty ->
+                // Navigate to the SudokuBoardScreen with the selected difficulty
                 showDifficultyDialog = false
-                // Use the selected difficulty to create the Sudoku board
-//                SudokuBuilder.createBoard(difficulty)
+                navController.navigate("sudokuBoard/$difficulty")
             }
         )
     }
@@ -242,5 +248,5 @@ fun ExpandableCard(title: String, content: String) {
 @Composable
 @Preview(showBackground = true)
 fun DetailScreenPreview() {
-    DetailScreen()
+//    DetailScreen()
 }

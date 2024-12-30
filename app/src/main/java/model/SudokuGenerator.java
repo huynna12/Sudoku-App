@@ -2,17 +2,22 @@ package model;
 
 import java.util.Random;
 public class SudokuGenerator {
-    private SudokuBoard board;
+    SudokuBoard board;
     private SudokuSolver solver;
     private static final Random random = new Random();
     private static final int EASY = 43;
     private static final int MEDIUM = 47;
     private static final int HARD = 52;
 
-    public SudokuGenerator(SudokuBoard board, String level){
+    public SudokuGenerator(SudokuBoard board, String level) {
         this.board = board;
         solver = new SudokuSolver(board);
-        switch(level){
+
+        if (level == null || level.isEmpty()) {
+            level = "Easy";  // Default to "Easy" if level is invalid
+        }
+
+        switch(level) {
             case "Easy":
                 generateBoard(EASY);
                 break;
@@ -22,6 +27,8 @@ public class SudokuGenerator {
             case "Hard":
                 generateBoard(HARD);
                 break;
+            default:
+                throw new IllegalArgumentException("Invalid difficulty level: " + level);
         }
     }
 

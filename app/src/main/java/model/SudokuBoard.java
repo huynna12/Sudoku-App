@@ -5,7 +5,7 @@ import java.util.Random;
 public class SudokuBoard {
     private int[][] board;
     private static final Random random = new Random();
-    private  static final int[] num = new int[]{1,2,3,4,5,6,7,8,9};
+    private  static final int[] numbers = new int[]{1,2,3,4,5,6,7,8,9};
     /**
      * Create a standard 9x9 SUDOKU board
      */
@@ -94,8 +94,8 @@ public class SudokuBoard {
         if(col == 9){
             return fillCell(row + 1, 0);  //reset the col and move down to a new row
         }
-        shuffleArray(num);
-        for(int curNum : num){
+        shuffleArray(numbers);
+        for(int curNum : numbers){
             if(isValid(row, col, curNum)){
                 board[row][col] = curNum;
 
@@ -127,4 +127,23 @@ public class SudokuBoard {
             System.out.println();
         }
     }
+
+    /**
+     * Return an array of numbers that is in the board
+     * @return an array of numbers that is in the board, index acted as the number the the value that
+     * that index is the total numbers of the number on the board
+     */
+    public int[] totalNumbers(){
+        int[] numbersLeft = new int[9];
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                if(board[r][c] != 0){
+                    numbersLeft[board[r][c] - 1]++;
+                }
+            }
+        }
+        return numbersLeft;
+    }
 }
+
+
