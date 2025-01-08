@@ -21,34 +21,63 @@ import androidx.navigation.NavController
 import model.SudokuBoard
 import model.SudokuSolver
 
-
 //@Composable
 //fun SudokuBoardScreen(
 //    board: SudokuBoard,
 //    navController: NavController
 //) {
+//    var sudokuBoard by remember { mutableStateOf(board) }
+//    var selectedRow by remember { mutableIntStateOf(-1) }
+//    var selectedCol by remember { mutableIntStateOf(-1) }
+//    var errorMessage by remember { mutableStateOf("") }
+//    var errors by remember { mutableIntStateOf(0) }
+//    var elapsedTime by remember { mutableIntStateOf(0) }
+//    var score by remember { mutableIntStateOf(0)}
+//    var strike by remember { mutableIntStateOf(1) }
+//    var isTimerRunning by remember { mutableStateOf(true) }
+//
+//    val completedBoard = remember {
+//        SudokuSolver(board.copy()).getCompleteBoard()
+//    }
+//
+//    LaunchedEffect(isTimerRunning) {
+//        while (isTimerRunning) {
+//            delay(1000L)
+//            elapsedTime++
+//        }
+//    }
+//
 //    Column(
 //        Modifier.fillMaxSize(),
 //        verticalArrangement = Arrangement.SpaceEvenly,
 //        horizontalAlignment = Alignment.CenterHorizontally
 //    ) {
+//        Row(){
+//            // Display elapsed time
+//            val minutes = elapsedTime / 60
+//            val seconds = elapsedTime % 60
+//            val timeFormatted = String.format("%02d:%02d", minutes, seconds)
+//            Text(
+//                text = "Time: $timeFormatted",
+//                color = Color.Black,
+//                fontSize = 18.sp,
+//                modifier = Modifier.padding(16.dp)
+//            )
 //
-//        val completedBoard = remember {
-//            mutableStateOf(SudokuSolver(board.copy()).getCompleteBoard())
+//            Text(
+//                text = "Score: $score",
+//                color = Color.Black,
+//                fontSize = 18.sp,
+//                modifier = Modifier.padding(16.dp)
+//            )
+//
+//            Text(
+//                text = "Errors: $errors",
+//                color = Color.Black,
+//                fontSize = 18.sp,
+//                modifier = Modifier.padding(16.dp)
+//            )
 //        }
-//
-//        var sudokuBoard by remember { mutableStateOf(board) }
-//        var selectedRow by remember { mutableIntStateOf(-1) }
-//        var selectedCol by remember { mutableIntStateOf(-1) }
-//        var errorMessage by remember { mutableStateOf("") }
-//
-//        var error = 0
-//
-//        displayTime()
-//
-//        Log.d("SudokuApp", "Initial board: $sudokuBoard")
-//        Log.d("SudokuApp", "Completed board: ${completedBoard.value}")
-//
 //        SudokuBoardDisplay(
 //            sudokuBoard = sudokuBoard,
 //            onCellClick = { row, col ->
@@ -63,25 +92,39 @@ import model.SudokuSolver
 //                col = selectedCol,
 //                sudokuBoard = sudokuBoard,
 //                onBoardUpdate = { updatedBoard ->
-//                    sudokuBoard = updatedBoard // Update the state here
+//                    sudokuBoard = updatedBoard
+//                    errorMessage = ""
+//                    selectedRow = -1
+//                    selectedCol = -1
+//                    score += 12 * strike++
 //                },
-//                completedBoard = completedBoard.value,
-//                onError = { errorMessage = it }
+//                completedBoard = completedBoard,
+//                onError = { error ->
+//                    errorMessage = error
+//                    errors++
+//                }
 //            )
 //        }
 //
 //        if (errorMessage.isNotEmpty()) {
-//            error++
 //            Text(
 //                text = errorMessage,
 //                color = Color.Red,
 //                fontSize = 18.sp,
 //                modifier = Modifier.padding(16.dp)
 //            )
+//            strike = 1
 //        }
 //
-//        if (isEndGame(board, error, navController)){
-//            navController.navigate("reward/=")
+//
+//        if (isEndGame(sudokuBoard, errors)) {
+//            isTimerRunning = false // Stop the timer
+//            val result = errors < 3
+//            // Navigate to RewardScreen with the final elapsed time
+//            navController.navigate("reward/${score}/${elapsedTime}/${result}")
+//        }
+//        else {
+//            displayAvailableNumbers(sudokuBoard)
 //        }
 //    }
 //}
@@ -97,18 +140,35 @@ fun SudokuBoardScreen(
     var errorMessage by remember { mutableStateOf("") }
     var errors by remember { mutableIntStateOf(0) }
     var elapsedTime by remember { mutableIntStateOf(0) }
-    var score by remember { mutableIntStateOf(0)}
+    var score by remember { mutableIntStateOf(0) }
     var strike by remember { mutableIntStateOf(1) }
+    var isTimerRunning by remember { mutableStateOf(true) }
 
     val completedBoard = remember {
         SudokuSolver(board.copy()).getCompleteBoard()
     }
 
-    LaunchedEffect(Unit) {
-        // Timer logic
-        while (true) {
+    // Control timer behavior
+    LaunchedEffect(isTimerRunning) {
+        while (isTimerRunning) {
             delay(1000L)
             elapsedTime++
+        }
+    }
+
+    // Check for end game condition
+    val gameEnded = isEndGame(sudokuBoard, errors)
+
+    // Navigate to reward screen when the game ends
+    if (gameEnded) {
+        // Stop the timer before navigating
+        isTimerRunning = false
+
+        val result = errors < 3
+        LaunchedEffect(gameEnded) {
+            // Delay navigation to ensure UI updates before transitioning
+            delay(500L)
+            navController.navigate("reward/${score}/${elapsedTime}/${result}")
         }
     }
 
@@ -117,32 +177,17 @@ fun SudokuBoardScreen(
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(){
-            // Display elapsed time
+        Row {
+            // Display elapsed time, score, and errors
             val minutes = elapsedTime / 60
             val seconds = elapsedTime % 60
             val timeFormatted = String.format("%02d:%02d", minutes, seconds)
-            Text(
-                text = "Time: $timeFormatted",
-                color = Color.Black,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(16.dp)
-            )
 
-            Text(
-                text = "Score: $score",
-                color = Color.Black,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-
-            Text(
-                text = "Errors: $errors",
-                color = Color.Black,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(16.dp)
-            )
+            Text(text = "Time: $timeFormatted", color = Color.Black, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+            Text(text = "Score: $score", color = Color.Black, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+            Text(text = "Errors: $errors", color = Color.Black, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
         }
+
         SudokuBoardDisplay(
             sudokuBoard = sudokuBoard,
             onCellClick = { row, col ->
@@ -161,35 +206,23 @@ fun SudokuBoardScreen(
                     errorMessage = ""
                     selectedRow = -1
                     selectedCol = -1
+                    score += 12 * strike++
                 },
                 completedBoard = completedBoard,
                 onError = { error ->
                     errorMessage = error
                     errors++
-                    strike = 1
                 }
             )
         }
 
         if (errorMessage.isNotEmpty()) {
-            Text(
-                text = errorMessage,
-                color = Color.Red,
-                fontSize = 18.sp,
-                modifier = Modifier.padding(16.dp)
-            )
-        }else {
-            score += 12 * strike
+            Text(text = errorMessage, color = Color.Red, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+            strike = 1
         }
 
-        if (isEndGame(sudokuBoard, errors)) {
-            var result = true
-            if(errors == 3){
-                result = false
-            }
-            // Pass arguments via navigation
-            navController.navigate("reward/${score}/${elapsedTime}/${result}")
-        } else {
+        // Display available numbers (only when the game isn't finished)
+        if (!gameEnded) {
             displayAvailableNumbers(sudokuBoard)
         }
     }

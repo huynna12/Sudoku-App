@@ -3,6 +3,7 @@ package com.example.sudokuapp.screens
 import SudokuBoardScreen
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -42,11 +43,15 @@ fun SetupNavGraph(
         composable(
             route = Screen.Reward.route,
             arguments = listOf(
-                navArgument("score"){},
-                
+                navArgument("score") { type = NavType.IntType },
+                navArgument("time") { type = NavType.IntType },
+                navArgument("result") { type = NavType.BoolType }
             )
-        ){
-            RewardScreen(3000, 12.10, true, navController)
+        ) { backStackEntry ->
+            val score = backStackEntry.arguments?.getInt("score") ?: 0
+            val time = backStackEntry.arguments?.getInt("time") ?: 0
+            val result = backStackEntry.arguments?.getBoolean("result") ?: false
+            RewardScreen(score = score, time = time, result = result, navController = navController) // Pass time directly
         }
     }
 }
