@@ -1,4 +1,5 @@
 import android.util.Log
+import android.util.Log.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,51 +17,193 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import androidx.navigation.NavController
 import model.SudokuBoard
-import model.SudokuGenerator
+import model.SudokuSolver
+
+
+//@Composable
+//fun SudokuBoardScreen(
+//    board: SudokuBoard,
+//    navController: NavController
+//) {
+//    Column(
+//        Modifier.fillMaxSize(),
+//        verticalArrangement = Arrangement.SpaceEvenly,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//
+//        val completedBoard = remember {
+//            mutableStateOf(SudokuSolver(board.copy()).getCompleteBoard())
+//        }
+//
+//        var sudokuBoard by remember { mutableStateOf(board) }
+//        var selectedRow by remember { mutableIntStateOf(-1) }
+//        var selectedCol by remember { mutableIntStateOf(-1) }
+//        var errorMessage by remember { mutableStateOf("") }
+//
+//        var error = 0
+//
+//        displayTime()
+//
+//        Log.d("SudokuApp", "Initial board: $sudokuBoard")
+//        Log.d("SudokuApp", "Completed board: ${completedBoard.value}")
+//
+//        SudokuBoardDisplay(
+//            sudokuBoard = sudokuBoard,
+//            onCellClick = { row, col ->
+//                selectedRow = row
+//                selectedCol = col
+//            }
+//        )
+//
+//        if (selectedRow != -1 && selectedCol != -1) {
+//            editCellDialog(
+//                row = selectedRow,
+//                col = selectedCol,
+//                sudokuBoard = sudokuBoard,
+//                onBoardUpdate = { updatedBoard ->
+//                    sudokuBoard = updatedBoard // Update the state here
+//                },
+//                completedBoard = completedBoard.value,
+//                onError = { errorMessage = it }
+//            )
+//        }
+//
+//        if (errorMessage.isNotEmpty()) {
+//            error++
+//            Text(
+//                text = errorMessage,
+//                color = Color.Red,
+//                fontSize = 18.sp,
+//                modifier = Modifier.padding(16.dp)
+//            )
+//        }
+//
+//        if (isEndGame(board, error, navController)){
+//            navController.navigate("reward/=")
+//        }
+//    }
+//}
 
 @Composable
-fun SudokuBoardScreen(difficulty: String?) {
+fun SudokuBoardScreen(
+    board: SudokuBoard,
+    navController: NavController
+) {
+    var sudokuBoard by remember { mutableStateOf(board) }
+    var selectedRow by remember { mutableIntStateOf(-1) }
+    var selectedCol by remember { mutableIntStateOf(-1) }
+    var errorMessage by remember { mutableStateOf("") }
+    var errors by remember { mutableIntStateOf(0) }
+    var elapsedTime by remember { mutableIntStateOf(0) }
+    var score by remember { mutableIntStateOf(0)}
+    var strike by remember { mutableIntStateOf(1) }
+
+    val completedBoard = remember {
+        SudokuSolver(board.copy()).getCompleteBoard()
+    }
+
+    LaunchedEffect(Unit) {
+        // Timer logic
+        while (true) {
+            delay(1000L)
+            elapsedTime++
+        }
+    }
+
     Column(
         Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Debug the received difficulty
-        Log.d("SudokuBoardScreen", "Received difficulty: $difficulty")
+        Row(){
+            // Display elapsed time
+            val minutes = elapsedTime / 60
+            val seconds = elapsedTime % 60
+            val timeFormatted = String.format("%02d:%02d", minutes, seconds)
+            Text(
+                text = "Time: $timeFormatted",
+                color = Color.Black,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(16.dp)
+            )
 
-        // Generate the Sudoku board based on the difficulty
-        val validDifficulty = difficulty ?: "Easy"
+            Text(
+                text = "Score: $score",
+                color = Color.Black,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(16.dp)
+            )
 
-        // Generate the Sudoku board and log the result
-        val board = SudokuBoard()
-        val generator = SudokuGenerator(board, validDifficulty)
-        val sudokuBoard = generator.getBoard()
+            Text(
+                text = "Errors: $errors",
+                color = Color.Black,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+        SudokuBoardDisplay(
+            sudokuBoard = sudokuBoard,
+            onCellClick = { row, col ->
+                selectedRow = row
+                selectedCol = col
+            }
+        )
 
-        Log.d("SudokuBoardScreen", "Generated Board: $sudokuBoard")
+        if (selectedRow != -1 && selectedCol != -1) {
+            editCellDialog(
+                row = selectedRow,
+                col = selectedCol,
+                sudokuBoard = sudokuBoard,
+                onBoardUpdate = { updatedBoard ->
+                    sudokuBoard = updatedBoard
+                    errorMessage = ""
+                    selectedRow = -1
+                    selectedCol = -1
+                },
+                completedBoard = completedBoard,
+                onError = { error ->
+                    errorMessage = error
+                    errors++
+                    strike = 1
+                }
+            )
+        }
 
-        // Display the Sudoku board
-        displayTime()
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = Color.Red,
+                fontSize = 18.sp,
+                modifier = Modifier.padding(16.dp)
+            )
+        }else {
+            score += 12 * strike
+        }
 
-        SudokuBoardDisplay(sudokuBoard = sudokuBoard)
-
-        displayAvailableNumbers(board = sudokuBoard)
-
-
+        if (isEndGame(sudokuBoard, errors)) {
+            var result = true
+            if(errors == 3){
+                result = false
+            }
+            // Pass arguments via navigation
+            navController.navigate("reward/${score}/${elapsedTime}/${result}")
+        } else {
+            displayAvailableNumbers(sudokuBoard)
+        }
     }
 }
-
 
 @Composable
 fun SudokuBoardDisplay(
     sudokuBoard: SudokuBoard,
-    onCellClick: ((row: Int, col: Int) -> Unit)? = null
+    onCellClick: (row: Int, col: Int) -> Unit
 ) {
     Box(
         modifier = Modifier
-            .background(Color.Black) // Outer border for the grid
-            .padding(3.dp) // Padding for subsquare borders
+            .background(Color.Black)
+            .padding(3.dp)
     ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(0.dp),
@@ -74,8 +217,8 @@ fun SudokuBoardDisplay(
                     for (c in 0 until 9) {
                         SudokuCell(
                             value = sudokuBoard.getCell(r, c),
-                            isHighlighted = (r / 3 + c / 3) % 2 == 0, // Alternate block colors
-                            onClick = { onCellClick?.invoke(r, c) }
+                            isHighlighted = (r / 3 + c / 3) % 2 == 0,
+                            onClick = { onCellClick(r, c) }
                         )
                     }
                 }
@@ -85,18 +228,19 @@ fun SudokuBoardDisplay(
 }
 
 @Composable
-fun SudokuCell(value: Int, isHighlighted: Boolean, onClick: (() -> Unit)? = null) {
+fun SudokuCell(
+    value: Int,
+    isHighlighted: Boolean,
+    onClick: (() -> Unit)?
+) {
     Box(
         modifier = Modifier
             .size(45.dp)
             .background(
-                color = if (isHighlighted) Color(0xFFEDEDED) else Color.White, // Subsquare coloring
+                color = if (isHighlighted) Color(0xFFEDEDED) else Color.White,
                 shape = RoundedCornerShape(4.dp)
             )
-            .border(
-                width = .5.dp,
-                color = Color.Black // Cell borders
-            )
+            .border(0.5.dp, Color.Black)
             .clickable { onClick?.invoke() },
         contentAlignment = Alignment.Center
     ) {
@@ -109,15 +253,72 @@ fun SudokuCell(value: Int, isHighlighted: Boolean, onClick: (() -> Unit)? = null
 }
 
 @Composable
-fun displayAvailableNumbers(board: SudokuBoard){
-    val totalNumbers = board.totalNumbers()
-    Row(){
-        for((index, num) in totalNumbers.withIndex()){
-            if(num != 9){
-                Text(text = (index + 1).toString(), Modifier.padding(horizontal = 13.dp), fontSize = 30.sp)
+fun editCellDialog(
+    row: Int,
+    col: Int,
+    sudokuBoard: SudokuBoard, // Directly pass the current board state
+    onBoardUpdate: (SudokuBoard) -> Unit, // Callback to update the board state
+    completedBoard: SudokuBoard,
+    onError: (String) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Select a number for cell ($row, $col):", fontSize = 18.sp)
+        Row(
+            modifier = Modifier.padding(top = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            for (num in 1..9) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(Color.Gray, shape = RoundedCornerShape(4.dp))
+                        .clickable {
+                            val correctMove = validateMove(row, col, num, completedBoard)
+
+                            if (correctMove) {
+                                // Create an updated copy of the board
+                                val updatedBoard = sudokuBoard.copy().apply {
+                                    setCell(row, col, num)
+                                }
+
+                                // Update the board state via the callback
+                                onBoardUpdate(updatedBoard)
+                            } else {
+                                onError("Wrong number! Try again.")
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = num.toString(),
+                        color = Color.White,
+                        fontSize = 16.sp
+                    )
+                }
             }
-            else {
-                 Text(text = " ", Modifier.padding(horizontal = 20.dp))
+        }
+    }
+}
+
+@Composable
+fun displayAvailableNumbers(board: SudokuBoard) {
+    val totalNumbers = board.totalNumbers()
+    Row {
+        for ((index, num) in totalNumbers.withIndex()) {
+            if (num != 9) {
+                Text(
+                    text = (index + 1).toString(),
+                    Modifier.padding(horizontal = 13.dp),
+                    fontSize = 30.sp
+                )
+            } else {
+                Text(text = " ", Modifier.padding(horizontal = 20.dp))
             }
         }
     }
@@ -125,39 +326,45 @@ fun displayAvailableNumbers(board: SudokuBoard){
 
 @Composable
 fun displayTime() {
-    // Track the elapsed time in seconds
     var elapsedTime by remember { mutableIntStateOf(0) }
 
-    // Start the timer
     LaunchedEffect(Unit) {
         while (true) {
-            delay(1000L) // Wait for 1 second
+            delay(1000L)
             elapsedTime += 1
         }
     }
 
-    // Format time as mm:ss
     val minutes = elapsedTime / 60
     val seconds = elapsedTime % 60
     val timeFormatted = String.format("%02d:%02d", minutes, seconds)
 
-    // Display the timer
     Text(
         text = timeFormatted,
         color = Color.Black,
         fontSize = 18.sp,
-        modifier = Modifier
-            .padding(16.dp) // Padding from the edges
+        modifier = Modifier.padding(16.dp)
     )
 }
 
+fun validateMove(
+    row: Int,
+    col: Int,
+    num: Int,
+    completedBoard: SudokuBoard
+): Boolean {
+    return completedBoard.getCell(row, col) == num
+}
+
+//Helper method to stop the game when the user is done
+
+@Composable
+fun isEndGame(board: SudokuBoard, errors: Int): Boolean {
+    return errors == 3 || board.totalNumbers().all { it == 9 }
+}
+
+
 @Preview
 @Composable
-fun SudokuGameScreenPreview(){
-    val board = SudokuBoard()
-    val generator = SudokuGenerator(board, "Easy")
-    val sudokuBoard = generator.getBoard()
-    SudokuBoardDisplay(sudokuBoard = sudokuBoard)
-
-//    displayAvailableNumbers(sudokuBoard)
+fun SudokuGameScreenPreview() {
 }

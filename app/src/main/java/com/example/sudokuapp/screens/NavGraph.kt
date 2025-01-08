@@ -5,6 +5,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import model.SudokuBoard
+import model.SudokuGenerator
 
 @Composable
 fun SetupNavGraph(
@@ -30,7 +33,20 @@ fun SetupNavGraph(
         // Add the new screen for the Sudoku board
         composable( route = Screen.SudokuBoard.route) { backStackEntry ->
             val difficulty = backStackEntry.arguments?.getString("difficulty") ?: "Easy" // Default to "Easy" if missing
-            SudokuBoardScreen(difficulty = difficulty)
+            val initialBoard = SudokuBoard()
+            val generator = SudokuGenerator(initialBoard, difficulty)
+
+            SudokuBoardScreen(generator.getBoard(), navController)
+        }
+
+        composable(
+            route = Screen.Reward.route,
+            arguments = listOf(
+                navArgument("score"){},
+                
+            )
+        ){
+            RewardScreen(3000, 12.10, true, navController)
         }
     }
 }

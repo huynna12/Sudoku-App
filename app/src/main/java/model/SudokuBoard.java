@@ -14,6 +14,11 @@ public class SudokuBoard {
         fillBoard();
     }
 
+    public SudokuBoard(int[][] thisBoard){
+        board = thisBoard;
+    }
+
+
     /**
      * Return the value of the cell at given row and column
      * @param r -   given row
@@ -119,13 +124,16 @@ public class SudokuBoard {
         }
     }
 
-    public void printBoard(){
+    public String toString(){
+       String s = "";
         for(int r = 0; r < 9; r++){
             for(int c = 0; c < 9; c++){
-                System.out.print(board[r][c]);
+                s +=  board[r][c] + " ";
             }
-            System.out.println();
+            s += "\n ";
         }
+
+        return s;
     }
 
     /**
@@ -143,6 +151,17 @@ public class SudokuBoard {
             }
         }
         return numbersLeft;
+    }
+
+    public SudokuBoard copy(){
+        int[][] newBoard = new int[9][9];
+        for(int r = 0; r < 9; r++){
+            for(int c = 0; c < 9; c++){
+                newBoard[r][c] = board[r][c];
+            }
+        }
+
+        return new SudokuBoard(newBoard);
     }
 }
 
